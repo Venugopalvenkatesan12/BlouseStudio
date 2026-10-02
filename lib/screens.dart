@@ -560,8 +560,9 @@ class _DesignEditState extends State<DesignEdit> {
         if (image != null && File(image!).existsSync())
           SizedBox(height: 220, child: Image.file(File(image!), fit: BoxFit.contain)),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          TextButton.icon(onPressed: () => pick(ImageSource.camera), icon: const Icon(Icons.camera_alt), label: const Text('Camera')),
-          TextButton.icon(onPressed: () => pick(ImageSource.gallery), icon: const Icon(Icons.photo), label: const Text('Gallery')),
+          if (!Platform.isWindows)
+            TextButton.icon(onPressed: () => pick(ImageSource.camera), icon: const Icon(Icons.camera_alt), label: const Text('Camera')),
+          TextButton.icon(onPressed: () => pick(ImageSource.gallery), icon: const Icon(Icons.photo), label: Text(Platform.isWindows ? 'Choose photo' : 'Gallery')),
         ]),
         TextField(controller: name, decoration: const InputDecoration(labelText: 'Design name', border: OutlineInputBorder())),
         const SizedBox(height: 10),

@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Bumped after every write so screens reload.
 final ValueNotifier<int> dataVersion = ValueNotifier<int>(0);
@@ -29,7 +32,20 @@ class Settings {
 
 class DB {
   static Database? _db;
-  static Future<String> get path async => p.join(await getDatabasesPath(), 'studio.db');
+  /// Call once at start-up: desktop needs the FFI sqlite implementation.
+  static void initPlatform() {
+    if (Platform.isWindows || Platform.isLinux) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+  }
+
+  static Future<String> get path async {
+    final dir = await getApplicationSupportDirectory();
+    await dir.create(recursive: true);
+    return p.join(dir.path, 'studio.db');
+  }
+
   static Future<Database> get db async => _db ??= await _open();
 
   static Future<Database> _open() async {

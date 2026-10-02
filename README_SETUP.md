@@ -14,3 +14,11 @@
 First use: default PIN is 1234 (change it in Settings, the gear icon).
 Printer: phone and printer on the same WiFi, Mopria / HP Print Service / Epson Print Enabler turned on.
 If the build shows a red cross, open the failed step and send me the error text.
+
+
+## Windows PC version (same app)
+The same GitHub build also makes a Windows program. In step 5 download the artifact "BlouseStudio-windows" as well.
+Unzip it to a folder (e.g. C:\BlouseStudio), keep ALL files together, and double-click blouse_studio.exe
+(right-click > Send to > Desktop to make a shortcut). Printing uses your normal Windows printer dialog.
+If Windows says a DLL is missing, install the free "Microsoft Visual C++ Redistributable (x64)".
+PC data is stored separately from the phone (no sync yet). Camera button is replaced by "Choose photo" on PC.

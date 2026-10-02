@@ -1,10 +1,11 @@
-name: Build Android APK
+name: Build Android APK and Windows EXE
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
+
 jobs:
-  build:
+  android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,3 +30,27 @@ jobs:
         with:
           name: BlouseStudio-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Windows project around our code
+        run: |
+          cp -r lib /tmp/lib_bak && cp pubspec.yaml /tmp/pubspec_bak.yaml
+          flutter create --platforms=windows --org com.blousestudio --project-name blouse_studio .
+          rm -rf lib && cp -r /tmp/lib_bak lib && cp /tmp/pubspec_bak.yaml pubspec.yaml
+          rm -rf test
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlouseStudio-windows
+          path: build/windows/x64/runner/Release/

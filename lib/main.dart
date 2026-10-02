@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'db.dart';
@@ -6,6 +9,7 @@ import 'screens.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  DB.initPlatform();
   await Settings.load();
   runApp(const BlouseApp());
 }
@@ -44,7 +48,12 @@ class _HomeState extends State<Home> {
           },
         ),
       ]),
-      body: IndexedStack(index: tab, children: const [PrintScreen(), CustomersScreen(), DesignsScreen(), OrdersScreen()]),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 760),
+          child: IndexedStack(index: tab, children: const [PrintScreen(), CustomersScreen(), DesignsScreen(), OrdersScreen()]),
+        ),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: tab,
         onDestinationSelected: (i) => setState(() => tab = i),
@@ -105,7 +114,17 @@ class _SettingsState extends State<SettingsScreen> {
         ),
         const Divider(height: 40),
         OutlinedButton.icon(
-          onPressed: () async => Share.shareXFiles([XFile(await DB.path)], text: 'Blouse Studio backup'),
+          onPressed: () async {
+            final src = await DB.path;
+            if (Platform.isWindows) {
+              final docs = await getApplicationDocumentsDirectory();
+              final dest = p.join(docs.path, 'BlouseStudio_backup_${DateTime.now().millisecondsSinceEpoch}.db');
+              await File(src).copy(dest);
+              if (context.mounted) toast(context, 'Backup saved: $dest');
+            } else {
+              await Share.shareXFiles([XFile(src)], text: 'Blouse Studio backup');
+            }
+          },
           icon: const Icon(Icons.backup),
           label: const Padding(
               padding: EdgeInsets.all(12), child: Text('Backup database (share to Drive / WhatsApp)')),
